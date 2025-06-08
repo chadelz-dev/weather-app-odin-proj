@@ -1,0 +1,162 @@
+Full Deployment Rundown
+
+These steps build, deploy, and configure your app for GitHub Pages,
+ensuring deploy-branch contains only .gitignore, index.html, bundle.js, bundle.js.map,
+src_assets_icons_*.bundle.js, and assets at root.
+
+// //////
+
+-- Verify .gitignore on main:
+
+ - Open .gitignore in your project root. Ensure it contains:
+
+node_modules/
+dist/
+
+ - If not, update it:
+
+echo -e "node_modules/\ndist/" > .gitignore
+git add .gitignore
+git commit -m "Update .gitignore for main"
+git push origin main
+
+ - This keeps main clean of generated files.
+
+// //////
+
+-- Build the App:
+
+npm run build
+
+ - Creates dist/ with index.html, bundle.js, bundle.js.map, src_assets_icons_*.bundle.js, and assets.
+
+// //////
+
+-- Create/Update deploy-branch:
+
+ - Switch to deploy-branch (create if new):
+
+git checkout -b deploy-branch || git checkout deploy-branch
+
+// //////
+
+-- Clear all tracked files (if any):
+
+git rm -rf --cached .
+git commit -m "Clear deploy-branch" --allow-empty
+
+// //////
+
+-- Move dist/ contents to root:
+
+mv dist/* .
+rm -rf dist/
+
+// //////
+
+-- Create .gitignore for deploy-branch:
+
+echo "node_modules/" > .gitignore
+
+// //////
+
+-- Stage and commit:
+
+git add index.html bundle.js bundle.js.map src_assets_icons_*.bundle.js assets .gitignore
+git commit -m "Add root files to deploy-branch"
+
+// //////
+
+Verify staged files:
+
+git status
+
+- Should show: .gitignore, bundle.js, bundle.js.map, index.html, src_assets_icons_*.bundle.js, assets.
+
+// //////
+
+-- Push to GitHub:
+
+git push origin deploy-branch
+
+// //////
+
+-- Remove untracked files on deploy-branch:
+
+git clean -fd
+
+ - Removes untracked files (e.g., src/, package.json, webpack.config.js) 
+   from local deploy-branch directory.
+
+// //////
+
+Verify:
+
+ls
+
+ - Should show: .gitignore bundle.js bundle.js.map index.html src_assets_icons_cloudy_svg.bundle.js src_assets_icons_rainy_svg.bundle.js src_assets_icons_snowy_svg.bundle.js src_assets_icons_sunny_svg.bundle.js assets.
+
+// //////
+
+-- Return to main:
+
+git checkout main
+
+ - What's on deploy-branch: Only .gitignore, index.html, bundle.js, bundle.js.map,
+   src_assets_icons_*.bundle.js, assets (ignoring node_modules).
+   No dist/, src/, package.json, or Webpack files.
+
+// //////
+
+-- Configure GitHub Pages:
+
+- Go to https://github.com/chadelz-dev/weather-app-odin-proj/settings/pages.
+
+Under Pages:
+
+Set Source to Deploy from a branch.
+Select deploy-branch (available since you pushed it).
+Set folder to / (root).
+Click Save.
+
+GitHub shows: “Your site is published at https://chadelz-dev.github.io/weather-app-odin-proj/” (may take 5–10 minutes).
+
+// //////
+
+-- Verify GitHub Pages:
+
+Visit https://chadelz-dev.github.io/weather-app-odin-proj/.
+
+Test all features:
+- Search “Port Elizabeth” and click “Get Weather”.
+- Verify current weather displays.
+- Check 14-day forecast starts collapsed with one toggle button.
+- Ensure autocomplete suggestions appear below input.
+- Test °C/°F toggle.
+
+// //////
+
+DevTools:
+
+Console: No 404 errors.
+Network: Verify assets/icons/*.svg and bundle.js load.
+Open-Meteo API: Data fetches successfully.
+
+If the site doesn’t load, check Pages settings or share errors.
+
+// //////
+
+-- Future Updates:
+
+git checkout main
+npm install
+npm run build
+git checkout deploy-branch
+rm -f index.html bundle.js bundle.js.map src_assets_icons_*.bundle.js
+rm -rf assets
+mv dist/* .
+rm -rf dist
+git add index.html bundle.js bundle.js.map src_assets_icons_*.js assets
+git commit -m "Update GitHub Pages files"
+git push origin deploy-branch
+git checkout main
